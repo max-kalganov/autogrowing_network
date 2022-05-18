@@ -22,5 +22,10 @@ def test_stat_network():
     display(HTML('nx.html'))
 
 
+def test_networkx():
+    nt = Network()
+    nt.add_node(1)
+
+
 if __name__ == '__main__':
     test_stat_network()
