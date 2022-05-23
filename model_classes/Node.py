@@ -1,4 +1,5 @@
-from typing import List, Optional, Any, Iterable
+import logging
+from typing import List, Optional, Any, Generator
 
 
 class Node:
@@ -55,9 +56,17 @@ class Node:
 
 class Receptor(Node):
 
-    def __init(self, input_iterator: Iterable[Any], output):
-        super().__init__(input_nodes_ids = [0])
+    def __init(self, input_iterator: Generator[Any], output_nodes_ids: List[int]):
+        assert isinstance(output_nodes_ids, list) and len(output_nodes_ids) > 0, \
+            f"incorrect output nodes for receptor {output_nodes_ids=}"
+        super().__init__(input_nodes_ids=[0])
         self.input_iterator = input_iterator
+        self.input_nodes_ids = None
 
     def forward_flow(self, graph: 'Graph') -> Optional[List[int]]:
-        pass
+        try:
+            self.value = next(self.input_iterator)
+            return self.output_nodes_ids
+        except StopIteration:
+            logging.info(f"Found stop iterator on receptor with {self.id=}")
+        return None
