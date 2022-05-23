@@ -9,6 +9,9 @@ class Graph:
         self.all_nodes = {node.id: node for node in input_nodes}
         self.input_nodes_ids = list(self.all_nodes.keys())
 
+    def get_node(self, node_id: int) -> Node:
+        return self.all_nodes[node_id]
+
     def add_node(self, node: Node, is_input: bool = False):
         assert node.id not in self.all_nodes, f"Node duplicate with id = {node.id}"
         self.all_nodes[node.id] = node
