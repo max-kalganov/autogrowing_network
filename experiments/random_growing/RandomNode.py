@@ -6,4 +6,4 @@ from model_classes import Node
 
 class RandomNode(Node):
     def calc_value(self, input_values: List[Any]) -> Any:
-        self.value = random()
+        return random()

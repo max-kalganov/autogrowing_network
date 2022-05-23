@@ -1,10 +1,14 @@
 """Proxy Netstream graph class"""
 from random import random
+from time import sleep
 from typing import Optional
+
+import gin
 
 from gs_netstream.sender import NetStreamSender
 
 
+@gin.configurable
 class NetStreamProxyGraph:
     """
     This is a utility class that handles 'source id' and 'time id' synchronization tokens.
@@ -24,6 +28,7 @@ class NetStreamProxyGraph:
     def run_sender_method(self, sender_method, *args, **kwargs):
         sender_method(self.source_id, self.time_id, *args, **kwargs)
         self.time_id += 1
+        sleep(0.1)
 
     def add_node(self, node: str):
         """Add a node to the graph."""
@@ -84,3 +89,10 @@ class NetStreamProxyGraph:
     def step_begins(self, time: int):
         """Begin a step."""
         self.run_sender_method(self.sender.step_begun, time)
+
+
+proxy_graph = NetStreamProxyGraph()
+
+
+def get_proxy_graph():
+    return proxy_graph

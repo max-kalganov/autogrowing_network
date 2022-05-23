@@ -3,17 +3,20 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List, Optional, Any, Generator
 
-from gs_netstream import NetStreamProxyGraph
+import gin
+
+from gs_netstream import get_proxy_graph
 
 
+@gin.configurable
 class NodeDrawer(ABC):
     id = 0
 
-    def __init__(self, proxy_graph: NetStreamProxyGraph):
-        self.__proxy_graph = proxy_graph
-        self.id = Node.update_id()
+    def __init__(self):
+        self._proxy_graph = get_proxy_graph()
+        self.id = NodeDrawer.update_id()
 
-        self.__proxy_graph.add_node(str(self.id))
+        self._proxy_graph.add_node(str(self.id))
         self.add_input_node = self.add_input_proxy_edge(self.add_input_node)
         self.add_output_node = self.add_output_proxy_edge(self.add_output_node)
         self.remove_input_node = self.del_input_proxy_edge(self.remove_input_node)
@@ -29,37 +32,33 @@ class NodeDrawer(ABC):
         return f"{node_in}_{node_out}"
 
     def add_proxy_edge(self, node_in: int, node_out: int):
-        self.__proxy_graph.add_edge(self._get_edge_id(node_in, node_out), str(node_in), str(node_out))
+        self._proxy_graph.add_edge(self._get_edge_id(node_in, node_out), str(node_in), str(node_out))
 
     def del_proxy_edge(self, node_in: int, node_out: int):
-        self.__proxy_graph.remove_edge(self._get_edge_id(node_in, node_out))
+        self._proxy_graph.remove_edge(self._get_edge_id(node_in, node_out))
 
-    @staticmethod
-    def add_input_proxy_edge(func):
-        def decorator(self, node_id: int, *args, **kwargs):
+    def add_input_proxy_edge(self, func):
+        def decorator(node_id: int, *args, **kwargs):
             self.add_proxy_edge(node_id, self.id)
-            return func(self, node_id, *args, **kwargs)
+            return func(node_id, *args, **kwargs)
         return decorator
 
-    @staticmethod
-    def add_output_proxy_edge(func):
-        def decorator(self, node_id: int, *args, **kwargs):
+    def add_output_proxy_edge(self, func):
+        def decorator(node_id: int, *args, **kwargs):
             self.add_proxy_edge(self.id, node_id)
-            return func(self, node_id, *args, **kwargs)
+            return func(node_id, *args, **kwargs)
         return decorator
 
-    @staticmethod
-    def del_input_proxy_edge(func):
-        def decorator(self, node_id: int, *args, **kwargs):
+    def del_input_proxy_edge(self, func):
+        def decorator(node_id: int, *args, **kwargs):
             self.del_proxy_edge(node_id, self.id)
-            return func(self, node_id, *args, **kwargs)
+            return func(node_id, *args, **kwargs)
         return decorator
 
-    @staticmethod
-    def del_output_proxy_edge(func):
-        def decorator(self, node_id: int, *args, **kwargs):
+    def del_output_proxy_edge(self, func):
+        def decorator(node_id: int, *args, **kwargs):
             self.del_proxy_edge(self.id, node_id)
-            return func(self, node_id, *args, **kwargs)
+            return func(node_id, *args, **kwargs)
         return decorator
 
     @abstractmethod
@@ -81,21 +80,29 @@ class NodeDrawer(ABC):
 
 class Node(NodeDrawer):
 
-    def __init__(self, input_nodes_ids: List[int],
+    def __init__(self, input_nodes_ids: Optional[List[int]],
                  output_nodes_ids: Optional[List[int]] = None,
-                 default_value: Optional[Any] = None,
-                 *args, **kwargs):
-        assert isinstance(input_nodes_ids, list) and len(input_nodes_ids) > 0,\
-            f"incorrect input nodes ids = {input_nodes_ids}"
-        self.input_nodes_ids = input_nodes_ids
-        self.output_nodes_ids = output_nodes_ids
+                 default_value: Optional[Any] = None):
+        self.input_nodes_ids = None
+        self.output_nodes_ids = None
+        super().__init__()
+        if input_nodes_ids:
+            for in_node in input_nodes_ids:
+                self.add_input_node(in_node)
+        if output_nodes_ids:
+            for out_node in output_nodes_ids:
+                self.add_output_node(out_node)
         self.value = default_value
-        super().__init__(*args, **kwargs)
 
     def add_input_node(self, node_id: int):
+        #TODO: replace with Node. add output node in that node. Process duplicates in drawing
+        if self.input_nodes_ids is None:
+            self.input_nodes_ids = []
         self.input_nodes_ids.append(node_id)
 
     def add_output_node(self, node_id: int):
+        if self.output_nodes_ids is None:
+            self.output_nodes_ids = []
         self.output_nodes_ids.append(node_id)
 
     def remove_input_node(self, node_id: int):
@@ -128,12 +135,10 @@ class Node(NodeDrawer):
 
 class Receptor(Node):
 
-    def __init__(self, input_iterator: Generator[Any], output_nodes_ids: List[int], *args, **kwargs):
-        assert isinstance(output_nodes_ids, list) and len(output_nodes_ids) > 0, \
-            f"incorrect output nodes for receptor {output_nodes_ids=}"
-        super().__init__(input_nodes_ids=[0], *args, **kwargs)
+    def __init__(self, input_iterator: Generator[None, Any, None], *args, **kwargs):
+        super().__init__(input_nodes_ids=None, default_value=0, *args, **kwargs)
         self.input_iterator = input_iterator
-        self.input_nodes_ids = None
+        self.has_stopped = False
 
     def forward_flow(self, graph: 'Graph') -> Optional[List[int]]:
         try:
@@ -141,4 +146,5 @@ class Receptor(Node):
             return self.output_nodes_ids
         except StopIteration:
             logging.info(f"Found stop iterator on receptor with {self.id=}")
+            self.has_stopped = True
         return None
