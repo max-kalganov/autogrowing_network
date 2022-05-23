@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Iterable
 
 
 class Node:
@@ -7,6 +7,8 @@ class Node:
     def __init__(self, input_nodes_ids: List[int],
                  output_nodes_ids: Optional[List[int]] = None,
                  default_value: Optional[Any] = None):
+        assert isinstance(input_nodes_ids, list) and len(input_nodes_ids) > 0,\
+            f"incorrect input nodes ids = {input_nodes_ids}"
         self.id = Node.update_id()
         self.input_nodes_ids = input_nodes_ids
         self.output_nodes_ids = output_nodes_ids
@@ -16,6 +18,20 @@ class Node:
     def update_id(cls):
         cls.id += 1
         return cls.id
+
+    def add_input_node(self, node_id: int):
+        self.input_nodes_ids.append(node_id)
+
+    def add_output_node(self, node_id: int):
+        self.output_nodes_ids.append(node_id)
+
+    def remove_input_node(self, node_id: int):
+        assert node_id in self.input_nodes_ids and len(self.input_nodes_ids) > 1, "can not remove input node"
+        self.input_nodes_ids.remove(node_id)
+
+    def remove_output_node(self, node_id: int):
+        assert node_id in self.output_nodes_ids, "can not remove output node"
+        self.output_nodes_ids.remove(node_id)
 
     def is_ready_to_calculate(self, graph: 'Graph') -> bool:
         """Check input nodes values"""
@@ -38,4 +54,10 @@ class Node:
 
 
 class Receptor(Node):
-    pass
+
+    def __init(self, input_iterator: Iterable[Any], output):
+        super().__init__(input_nodes_ids = [0])
+        self.input_iterator = input_iterator
+
+    def forward_flow(self, graph: 'Graph') -> Optional[List[int]]:
+        pass

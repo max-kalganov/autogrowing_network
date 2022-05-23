@@ -17,7 +17,15 @@ class Graph:
             self.input_nodes_ids.append(node.id)
 
     def delete_node(self, node_id: int):
+        node_to_delete = self.all_nodes[node_id]
+
         if node_id in self.input_nodes_ids:
             self.input_nodes_ids.remove(node_id)
 
         del self.all_nodes[node_id]
+
+        for input_node_id in node_to_delete.input_nodes_ids:
+            self.all_nodes[input_node_id].remove_output_node(node_id)
+
+        for output_node_id in node_to_delete.output_nodes_ids:
+            self.all_nodes[output_node_id].remove_input_node(node_id)
