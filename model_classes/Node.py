@@ -1,3 +1,4 @@
+"""Implementation of Node and Receptor based on Node"""
 import logging
 from typing import List, Optional, Any, Generator
 
