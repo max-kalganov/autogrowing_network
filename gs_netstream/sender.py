@@ -20,6 +20,7 @@ from .constants import *
 import logging
 from .common import AttributeSink, ElementSink
 from .sender_utils import get_msg, get_type, encode_value
+logger = logging.getLogger()
 
 
 class DefaultNetStreamTransport:
@@ -36,7 +37,7 @@ class DefaultNetStreamTransport:
         if self.socket is None:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.connect((self.host, self.port))
-            logging.info(f"Connected to remote server - host = {self.host}, port = {self.port}")
+            logger.info(f"Connected to remote server - host = {self.host}, port = {self.port}")
 
     def send(self, data):
         """Send data to remote server."""
@@ -46,14 +47,14 @@ class DefaultNetStreamTransport:
             self.socket.sendall(data)
         except socket.error as err:
             self.socket = None
-            logging.error(err)
+            logger.error(err)
 
     def close(self):
         """Close the connection."""
         if self.socket:
             self.socket.close()
             self.socket = None
-            logging.info("disconnected from remote server")
+            logger.info("disconnected from remote server")
 
 
 class NetStreamSender(AttributeSink, ElementSink):
@@ -119,7 +120,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_ADD_NODE, source_id, time_id, node_id],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING])
-        logging.debug("node added: %s", {
+        logger.debug("node added: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": node_id
@@ -130,7 +131,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_DEL_NODE, source_id, time_id, node_id],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING])
-        logging.debug("node removed: %s", {
+        logger.debug("node removed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": node_id
@@ -142,7 +143,7 @@ class NetStreamSender(AttributeSink, ElementSink):
                       values=[EVENT_ADD_EDGE, source_id, time_id, edge_id, from_node, to_node, directed],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING, TYPE_STRING,
                                    TYPE_BOOLEAN])
-        logging.debug("edge added: %s", {
+        logger.debug("edge added: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "edge_id": edge_id,
@@ -156,7 +157,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_DEL_EDGE, source_id, time_id, edge_id],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING])
-        logging.debug("edge removed: %s", {
+        logger.debug("edge removed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": edge_id
@@ -167,7 +168,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_STEP, source_id, time_id, timestamp],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_DOUBLE])
-        logging.debug("step begun: %s", {
+        logger.debug("step begun: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "timestamp": timestamp
@@ -178,7 +179,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_CLEARED, source_id, time_id],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT])
-        logging.debug("graph cleared: %s", {
+        logger.debug("graph cleared: %s", {
             "source_id": source_id,
             "time_id": time_id
         })
@@ -193,7 +194,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_ADD_GRAPH_ATTR, source_id, time_id, attribute, dtype, value],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_BYTE, dtype])
-        logging.debug("graph attribute added: %s", {
+        logger.debug("graph attribute added: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "attribute": attribute,
@@ -210,7 +211,7 @@ class NetStreamSender(AttributeSink, ElementSink):
                               new_value_dtype, new_value],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_BYTE, old_value_dtype,
                                    TYPE_BYTE, new_value_dtype])
-        logging.debug("graph attribute changed: %s", {
+        logger.debug("graph attribute changed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "attribute": attribute,
@@ -223,7 +224,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_DEL_GRAPH_ATTR, source_id, time_id, attribute],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING])
-        logging.debug("graph attribute removed: %s", {
+        logger.debug("graph attribute removed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "attribute": attribute
@@ -235,7 +236,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_ADD_NODE_ATTR, source_id, time_id, node_id, attribute, dtype, value],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING, TYPE_BYTE, dtype])
-        logging.debug("node attribute added: %s", {
+        logger.debug("node attribute added: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": node_id,
@@ -253,7 +254,7 @@ class NetStreamSender(AttributeSink, ElementSink):
                               new_value_dtype, new_value],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING, TYPE_BYTE,
                                    old_value_dtype, TYPE_BYTE, new_value_dtype])
-        logging.debug("node attribute changed: %s", {
+        logger.debug("node attribute changed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": node_id,
@@ -267,7 +268,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_DEL_NODE_ATTR, source_id, time_id, node_id, attribute],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING])
-        logging.debug("node attribute removed: %s", {
+        logger.debug("node attribute removed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "node_id": node_id,
@@ -280,7 +281,7 @@ class NetStreamSender(AttributeSink, ElementSink):
         self.send_msg(source_id=source_id,
                       values=[EVENT_ADD_EDGE_ATTR, source_id, time_id, edge_id, attribute, dtype, value],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING, TYPE_BYTE, dtype])
-        logging.debug("edge attribute added: %s", {
+        logger.debug("edge attribute added: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "edge_id": edge_id,
@@ -299,7 +300,7 @@ class NetStreamSender(AttributeSink, ElementSink):
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING, TYPE_BYTE,
                                    old_value_dtype, TYPE_BYTE, new_value_dtype])
 
-        logging.debug("edge attribute changed: %s", {
+        logger.debug("edge attribute changed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "edge_id": edge_id,
@@ -314,7 +315,7 @@ class NetStreamSender(AttributeSink, ElementSink):
                       values=[EVENT_DEL_EDGE_ATTR, source_id, time_id, edge_id, attribute],
                       value_types=[TYPE_BYTE, TYPE_STRING, TYPE_INT, TYPE_STRING, TYPE_STRING])
 
-        logging.debug("edge attribute removed: %s", {
+        logger.debug("edge attribute removed: %s", {
             "source_id": source_id,
             "time_id": time_id,
             "edge_id": edge_id,

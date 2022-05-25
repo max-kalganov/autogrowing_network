@@ -7,9 +7,12 @@ from model_classes.Node import Node, Receptor
 
 class Graph:
     def __init__(self, input_nodes: List[Receptor]):
-        self.all_nodes = {node.id: node for node in input_nodes}
-        self.input_nodes_ids = list(self.all_nodes.keys())
+        self.all_nodes = {}
+        self.input_nodes_ids: List[int] = []
         self.__proxy_graph = NetStreamProxyGraph()
+
+        for in_node in input_nodes:
+            self.add_node(in_node, is_input=True)
 
     @staticmethod
     def _get_edge_draw_id(node_in: int, node_out: int) -> str:
@@ -32,6 +35,14 @@ class Graph:
 
         if is_input:
             self.input_nodes_ids.append(node.id)
+            self.set_node_draw_attribute(node.id)
+            self.set_node_size(node.id)
+
+    def set_node_draw_attribute(self, node_id: int):
+        self.__proxy_graph.add_node_attribute(self._get_node_draw_id(node_id), "ui.class", "still_neuron")
+
+    def set_node_size(self, node_id: int):
+        self.__proxy_graph.change_node_attribute(self._get_node_draw_id(node_id), "ui.size", "0.3gu", "1.5gu")
 
     def delete_node(self, node_id: int):
         assert node_id in self.all_nodes, f"Node with id = {node_id} not found"
@@ -48,6 +59,13 @@ class Graph:
 
         del self.all_nodes[node_id]
         self.__proxy_graph.remove_node(self._get_node_draw_id(node_id))
+
+    def add_edges(self, node_id: int, nodes_ids: List[int], as_input: bool = True):
+        for second_node_id in nodes_ids:
+            if as_input:
+                self.add_edge(second_node_id, node_id)
+            else:
+                self.add_edge(node_id, second_node_id)
 
     def add_edge(self, in_node_id: int, out_node_id: int):
         assert in_node_id in self.all_nodes and out_node_id in self.all_nodes, \
