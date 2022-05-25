@@ -8,8 +8,8 @@ class Node:
 
     def __init__(self, default_value: Optional[Any] = None):
         self.id = Node.update_id()
-        self.__input_nodes_ids = []
-        self.__output_nodes_ids = []
+        self._input_nodes_ids = []
+        self._output_nodes_ids = []
         self.value = default_value
 
     @classmethod
@@ -19,13 +19,13 @@ class Node:
 
     def is_ready_to_calculate(self, graph: 'Graph') -> bool:
         """Check input nodes values"""
-        return all([graph.all_nodes[node_id].value is not None for node_id in self.__input_nodes_ids])
+        return all([graph.all_nodes[node_id].value is not None for node_id in self._input_nodes_ids])
 
     def calc_value(self, input_values: List[Any]) -> Any:
         raise NotImplemented("calc_value is not implemented")
 
     def get_input_values(self, graph: 'Graph') -> List[Any]:
-        return [graph.all_nodes[node_id].value for node_id in self.__input_nodes_ids]
+        return [graph.all_nodes[node_id].value for node_id in self._input_nodes_ids]
 
     def forward_flow(self, graph: 'Graph') -> Optional[List[int]]:
         """Calculates value and returns nodes to be processed next in the flow"""
@@ -33,7 +33,7 @@ class Node:
         if self.is_ready_to_calculate(graph):
             input_values = self.get_input_values(graph)
             self.value = self.calc_value(input_values)
-            output_nodes_ids = self.__output_nodes_ids
+            output_nodes_ids = self._output_nodes_ids
         return output_nodes_ids
 
 
@@ -47,7 +47,7 @@ class Receptor(Node):
     def forward_flow(self, graph: 'Graph') -> Optional[List[int]]:
         try:
             self.value = next(self.input_iterator)
-            return self.__output_nodes_ids
+            return self._output_nodes_ids
         except StopIteration:
             logging.info(f"Found stop iterator on receptor with {self.id=}")
             self.has_stopped = True
