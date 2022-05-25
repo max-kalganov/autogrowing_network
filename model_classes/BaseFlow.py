@@ -23,7 +23,7 @@ class BaseFlow:
             node_id = self._nodes_flow_deque.popleft()
             node = self.graph.get_node(node_id)
             output_nodes_ids = node.forward_flow(self.graph)
-            if output_nodes_ids is not None:
+            if len(output_nodes_ids) == 0:
                 self.append_to_nodes_deque(output_nodes_ids)
             else:
                 self.process_leaf(node_id)

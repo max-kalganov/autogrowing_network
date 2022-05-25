@@ -2,11 +2,11 @@
 from typing import List
 
 from gs_netstream import NetStreamProxyGraph
-from model_classes.Node import Node
+from model_classes.Node import Node, Receptor
 
 
 class Graph:
-    def __init__(self, input_nodes: List[Node]):
+    def __init__(self, input_nodes: List[Receptor]):
         self.all_nodes = {node.id: node for node in input_nodes}
         self.input_nodes_ids = list(self.all_nodes.keys())
         self.__proxy_graph = NetStreamProxyGraph()
