@@ -89,10 +89,3 @@ class NetStreamProxyGraph:
     def step_begins(self, time: int):
         """Begin a step."""
         self.run_sender_method(self.sender.step_begun, time)
-
-
-proxy_graph = NetStreamProxyGraph()
-
-
-def get_proxy_graph():
-    return proxy_graph
