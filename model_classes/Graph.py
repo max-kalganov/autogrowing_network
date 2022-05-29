@@ -1,15 +1,20 @@
 """Implementation of the Graph which main function is to contain all nodes"""
 from typing import List
 
+import gin
+
 from gs_netstream import NetStreamProxyGraph
 from model_classes.Node import Node, Receptor
 
 
+@gin.configurable
 class Graph:
-    def __init__(self, input_nodes: List[Receptor]):
+    def __init__(self, input_nodes: List[Receptor], clear_graph: bool = False):
         self.all_nodes = {}
         self.input_nodes_ids: List[int] = []
         self.__proxy_graph = NetStreamProxyGraph()
+        if clear_graph:
+            self.__proxy_graph.clear_graph()
 
         for in_node in input_nodes:
             self.add_node(in_node, is_input=True)
