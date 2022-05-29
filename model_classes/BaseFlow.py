@@ -2,9 +2,12 @@
 from collections import deque
 from typing import List
 
+import gin
+
 from model_classes.Graph import Graph
 
 
+@gin.configurable
 class BaseFlow:
     def __init__(self, graph: Graph):
         self.graph = graph
@@ -29,8 +32,11 @@ class BaseFlow:
             else:
                 self.process_leaf(node_id)
 
-    def run_flow(self):
-        while all([self.graph.get_node(in_node_id).has_stopped is False for in_node_id in self.graph.input_nodes_ids]):
+    def is_flow_completed(self) -> bool:
+        return any([self.graph.get_node(in_node_id).has_stopped is True for in_node_id in self.graph.input_nodes_ids])
+
+    def run_flow(self) -> None:
+        while not self.is_flow_completed():
             self.run_single_flow()
             self.current_flow_num += 1
 
