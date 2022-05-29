@@ -1,0 +1,2 @@
+Graph.draw_graph = False
+SameResultsTestConf.a = "not default"
