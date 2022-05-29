@@ -1,2 +1,14 @@
-Graph.draw_graph = False
-SameResultsTestConf.a = "not default"
+import experiments.same_results_test_example
+
+
+DataGenerator.num_test_sameples = 10
+Receptor.input_iterator = @DataGenerator()
+ExampleGraph.draw_graph = False
+ExampleGraph.input_nodes = [@Receptor(), @Receptor(), @Receptor()]
+
+IncorrectExampleGraph.draw_graph = False
+IncorrectExampleGraph.input_nodes = [@Receptor(), @Receptor(), @Receptor()]
+
+
+BaseFlow.graph = @ExampleGraph() # test failing example - @IncorrectExampleGraph()
+SameResultsTestConf.FLOW = @BaseFlow()

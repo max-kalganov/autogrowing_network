@@ -1,9 +1,13 @@
 """Implementation of Node and Receptor based on Node"""
 import logging
 from typing import List, Optional, Any, Generator
+
+import gin
+
 logger = logging.getLogger()
 
 
+@gin.configurable
 class Node:
     id = 0
 
@@ -46,6 +50,7 @@ class Node:
         return f"input: {self._input_nodes_ids}; id: {self.id}; output: {self._output_nodes_ids}"
 
 
+@gin.configurable
 class Receptor(Node):
 
     def __init__(self, input_iterator: Generator[None, Any, None]):
