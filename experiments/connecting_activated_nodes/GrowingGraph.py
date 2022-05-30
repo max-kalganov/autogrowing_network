@@ -10,7 +10,7 @@ class GrowingGraph(Graph):
 
     def copy_node(self, node_id: int, NodeClass=Node) -> Node:
         node = self.get_node(node_id)
-        node_copy = NodeClass(default_value=node.value)
+        node_copy = NodeClass(default_value=node.value, default_flow_id=node.flow_calc_id)
 
         self.add_node(node_copy, is_input=False)
         self.add_edges(node_id=node_copy.id, nodes_ids=node._input_nodes_ids, as_input=True)

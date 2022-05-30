@@ -11,12 +11,12 @@ logger = logging.getLogger()
 class Node:
     id = 0
 
-    def __init__(self, default_value: Optional[Any] = None):
+    def __init__(self, default_value: Optional[Any] = None, default_flow_id: int = -1):
         self.id = Node.update_id()
         self._input_nodes_ids = []
         self._output_nodes_ids = []
         self.value = default_value
-        self.flow_calc_id = -1
+        self.flow_calc_id = default_flow_id
 
     @classmethod
     def update_id(cls):
