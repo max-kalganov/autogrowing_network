@@ -15,7 +15,8 @@ class NetStreamProxyGraph:
     It proposes utile classes that allow to directly send events through the network pipe.
     """
 
-    def __init__(self, sender: Optional[NetStreamSender] = None, source_id: Optional[str] = None, port: int = 8008):
+    def __init__(self, sender: Optional[NetStreamSender] = None, source_id: Optional[str] = None, port: int = 8008,
+                 sleep_time: float = 0.1):
         """Constructor can be with one NetStreamSender object and a source id OR with with 4 args.
 
         Notes:
@@ -24,11 +25,12 @@ class NetStreamProxyGraph:
         self.sender = sender if sender is not None else NetStreamSender(port)
         self.source_id = source_id if source_id else "nss%d" % (1000 * random())
         self.time_id = 0
+        self.sleep_time = sleep_time
 
     def run_sender_method(self, sender_method, *args, **kwargs):
         sender_method(self.source_id, self.time_id, *args, **kwargs)
         self.time_id += 1
-        sleep(0.1)
+        sleep(self.sleep_time)
 
     def add_node(self, node: str):
         """Add a node to the graph."""

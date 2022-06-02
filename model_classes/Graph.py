@@ -1,4 +1,5 @@
 """Implementation of the Graph which main function is to contain all nodes"""
+from copy import copy
 from typing import List
 
 import gin
@@ -39,32 +40,37 @@ class Graph:
         self.all_nodes[node.id] = node
         if self.draw_graph:
             self.__proxy_graph.add_node(self._get_node_draw_id(node_id=node.id))
+            self.set_node_draw_attribute(node.id, "ui.label", str(node.id))
 
         if is_input:
             self.input_nodes_ids.append(node.id)
             self.set_node_draw_attribute(node.id)
             self.set_node_size(node.id)
 
-    def set_node_draw_attribute(self, node_id: int):
+    def set_node_draw_attribute(self, node_id: int, atr: str = "ui.class", atr_type: str = "still_neuron"):
         if self.draw_graph:
-            self.__proxy_graph.add_node_attribute(self._get_node_draw_id(node_id), "ui.class", "still_neuron")
+            self.__proxy_graph.add_node_attribute(self._get_node_draw_id(node_id), atr, atr_type)
 
     def set_node_size(self, node_id: int):
         if self.draw_graph:
             self.__proxy_graph.change_node_attribute(self._get_node_draw_id(node_id), "ui.size", "0.3gu", "1.5gu")
 
-    def delete_node(self, node_id: int):
+    def delete_node(self, node_id: int, recursively: bool = True):
         assert node_id in self.all_nodes, f"Node with id = {node_id} not found"
         node_to_delete = self.all_nodes[node_id]
 
         if node_id in self.input_nodes_ids:
             self.input_nodes_ids.remove(node_id)
 
-        for input_node_id in node_to_delete._input_nodes_ids:
+        input_edges_to_delete = copy(node_to_delete._input_nodes_ids)
+        for input_node_id in input_edges_to_delete:
             self.del_edge(input_node_id, node_id)
 
-        for output_node_id in node_to_delete._output_nodes_ids:
+        output_edges_to_delete = copy(node_to_delete._output_nodes_ids)
+        for output_node_id in output_edges_to_delete:
             self.del_edge(node_id, output_node_id)
+            if recursively and len(self.get_node(output_node_id)._input_nodes_ids) == 0:
+                self.delete_node(output_node_id)
 
         del self.all_nodes[node_id]
 
