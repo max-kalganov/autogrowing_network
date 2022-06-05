@@ -19,7 +19,8 @@ class BaseFlow:
 
     def append_to_nodes_deque(self, nodes_ids: List[int]):
         for node_id in nodes_ids:
-            self._nodes_flow_deque.append(node_id)
+            if len(self._nodes_flow_deque) == 0 or node_id != self._nodes_flow_deque[-1]:
+                self._nodes_flow_deque.append(node_id)
 
     def run_single_flow(self):
         self.fill_started_nodes_deque()

@@ -1,10 +1,12 @@
 import experiments.connecting_activated_nodes
 
 NetStreamProxyGraph.port = 8008
-NetStreamProxyGraph.sleep_time = 0.01
+NetStreamProxyGraph.sleep_time = 0.0005
 
 GrowingGraph.draw_graph = True
 GrowingGraph.clear_graph = False
 
-GrowingNode.inactive_count = 5
-GrowingNode.active_count = 5
+GrowingNode.inactive_count = 30
+GrowingNode.active_count = 1
+GrowingNode.activation_limit = 0.2
+GrowingNode.max_duplicates = 2

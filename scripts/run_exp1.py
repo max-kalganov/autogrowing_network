@@ -1,4 +1,5 @@
 import random
+from typing import List, Tuple
 
 from experiments.connecting_activated_nodes import GrowingNode
 from experiments.connecting_activated_nodes.Flow import Flow
@@ -12,7 +13,7 @@ parser = argparse.ArgumentParser(description='Runs exp1 grow experiment')
 parser.add_argument('--config_path', dest='config_path', action='store',
                     default=None, help='path to the .gin config')
 logger = logging.getLogger()
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 def random_generator(number_of_values):
@@ -21,23 +22,30 @@ def random_generator(number_of_values):
         yield rval
 
 
+def create_receptor_with_node():
+    return Receptor(random_generator(num_iter)), GrowingNode()
+
+
+def add_input_to_graph(receptors_with_nodes: List[Tuple[Receptor, GrowingNode]]) -> GrowingGraph:
+    input_nodes = [rec for rec, node in receptors_with_nodes]
+    graph = GrowingGraph(input_nodes)
+
+    for rec, node in receptors_with_nodes:
+        graph.add_node(node)
+        graph.add_edge(rec.id, node.id)
+    return graph
+
+
 if __name__ == '__main__':
+    random.seed(1)
+
     args = parser.parse_args()
     if args.config_path is not None:
         gin.parse_config_file(args.config_path)
     num_iter = 100
-    rec1, node1 = Receptor(random_generator(num_iter)), GrowingNode()
-    rec2, node2 = Receptor(random_generator(num_iter)), GrowingNode()
-    rec3, node3 = Receptor(random_generator(num_iter)), GrowingNode()
-    input_nodes = [rec1, rec2, rec3]
-    graph = GrowingGraph(input_nodes)
-    graph.add_node(node1)
-    graph.add_node(node2)
-    graph.add_node(node3)
-
-    graph.add_edge(rec1.id, node1.id)
-    graph.add_edge(rec2.id, node2.id)
-    graph.add_edge(rec3.id, node3.id)
+    num_of_receptors = 20
+    receptors_with_nodes = [create_receptor_with_node() for i in range(num_of_receptors)]
+    graph = add_input_to_graph(receptors_with_nodes)
 
     flow = Flow(graph)
     flow.run_flow()

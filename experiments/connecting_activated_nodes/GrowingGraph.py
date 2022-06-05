@@ -1,3 +1,5 @@
+from typing import List
+
 import gin
 
 from model_classes import Graph, Node
@@ -16,3 +18,8 @@ class GrowingGraph(Graph):
         self.add_edges(node_id=node_copy.id, nodes_ids=node._input_nodes_ids, as_input=True)
         self.add_edges(node_id=node_copy.id, nodes_ids=node._output_nodes_ids, as_input=False)
         return node_copy
+
+    def add_node_with_edges(self, node: Node, input_nodes_ids: List[int], output_nodes_ids: List[int]):
+        self.add_node(node, is_input=False)
+        self.add_edges(node_id=node.id, nodes_ids=input_nodes_ids, as_input=True)
+        self.add_edges(node_id=node.id, nodes_ids=output_nodes_ids, as_input=False)

@@ -1,11 +1,13 @@
 """Implementation of the Graph which main function is to contain all nodes"""
+import logging
 from copy import copy
-from typing import List
+from typing import List, Set
 
 import gin
 
 from gs_netstream import NetStreamProxyGraph
 from model_classes.Node import Node, Receptor
+logger = logging.getLogger()
 
 
 @gin.configurable
@@ -115,3 +117,6 @@ class Graph:
     def del_proxy_edge(self, node_in: int, node_out: int):
         if self.draw_graph:
             self.__proxy_graph.remove_edge(self._get_edge_draw_id(node_in, node_out))
+
+    def __str__(self):
+        return '\n'.join([str(self.get_node(node_id)) for node_id in sorted(self.all_nodes.keys())])

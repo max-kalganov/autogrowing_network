@@ -17,8 +17,8 @@ class Flow(BaseFlow):
         self.fill_started_nodes_deque()
         while len(self._nodes_flow_deque) > 0:
             node_id = self._nodes_flow_deque.popleft()
-            if node_id not in self.graph.all_nodes \
-                    or self.graph.get_node(node_id).flow_calc_id == self.current_flow_num: continue
+            if node_id not in self.graph.all_nodes:
+                continue
 
             node = self.graph.get_node(node_id)
             output_nodes_ids = node.forward_flow(self.graph, self.current_flow_num)
@@ -30,16 +30,16 @@ class Flow(BaseFlow):
                 self.process_leaf(node_id)
 
     def connect_leafs(self):
-        active_leafs = []
+        active_leafs = set()
         for leaf_id in self._all_leafs:
             leaf: GrowingNode = self.graph.get_node(leaf_id)
             if leaf_id in self.graph.input_nodes_ids or leaf.is_active():
-                active_leafs.append(leaf_id)
+                active_leafs.add(leaf_id)
 
-        if len(active_leafs) > 0:
+        if len(active_leafs) > 1:
             new_node = GrowingNode()
             self.graph.add_node(new_node)
-            self.graph.add_edges(node_id=new_node.id, nodes_ids=active_leafs, as_input=True)
+            self.graph.add_edges(node_id=new_node.id, nodes_ids=list(active_leafs), as_input=True)
         self._all_leafs = []
 
     def run_flow(self) -> None:

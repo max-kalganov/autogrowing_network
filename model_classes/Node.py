@@ -16,6 +16,7 @@ class Node:
         self._input_nodes_ids = []
         self._output_nodes_ids = []
         self.value = default_value
+        self._default_value = default_value
         self.flow_calc_id = default_flow_id
 
     @classmethod
