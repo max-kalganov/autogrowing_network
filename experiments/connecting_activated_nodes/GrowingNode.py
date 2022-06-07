@@ -1,10 +1,10 @@
-import random
+from collections import defaultdict
 from copy import copy
-from typing import Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 import gin
 
-from model_classes import Node
+from model_classes import Node, Receptor
 import logging
 
 logger = logging.getLogger()
@@ -22,9 +22,8 @@ class GrowingNode(Node):
         self._default_inactive_count = inactive_count
         self._make_duplicate_flow_id = None
         self._duplicate_left = max_duplicates
-
-    def _are_input_nodes_processed(self, graph: 'Graph', current_flow_id: int) -> bool:
-        return all([graph.get_node(node_id).flow_calc_id == current_flow_id for node_id in self._input_nodes_ids])
+        self._input_nodes_values = defaultdict(int)
+        self._value_sum = 0
 
     def is_active(self) -> bool:
         return self.is_active_value(self.value, self._activation_limit)
@@ -33,25 +32,13 @@ class GrowingNode(Node):
     def is_active_value(value: float, activation_limit: float):
         return value > activation_limit
 
-    def calc_value(self, input_values: List[float]) -> float:
-        if len(input_values) > 0:
-            return sum(input_values)/len(input_values)
-        else:
-            return self._default_value
-
-    def get_input_values(self, graph: 'Graph', current_flow_id: int) -> List[float]:
-        input_values = []
-        for node_id in self._input_nodes_ids:
-            node = graph.get_node(node_id) if node_id in graph.all_nodes else None
-            if node is None:
-                continue
-            elif node_id in graph.input_nodes_ids:
-                input_values.append(node.value)
-            elif node.flow_calc_id != current_flow_id:
-                input_values.append(node._default_value)
-            elif node.is_active():
-                input_values.append(node.value)
-        return input_values
+    def calc_value(self, node: Union['GrowingNodeReceptor', 'GrowingNode'], node_id_from: int) -> float:
+        stored_node_value = self._input_nodes_values[node_id_from]
+        node_value = node.value
+        self._value_sum -= stored_node_value
+        self._value_sum += node_value
+        self._input_nodes_values[node_id_from] = node_value
+        return self._value_sum / len(self._input_nodes_values)
 
     def _process_active_value(self, graph):
         if self._active_count <= 0:
@@ -79,22 +66,39 @@ class GrowingNode(Node):
             self._inactive_count -= 1
         self._active_count = self._default_active_count
 
-    def _process_inputs(self, graph: 'GrowingGraph', current_flow_id: int) -> Union[int, List[int], None]:
-        input_values = self.get_input_values(graph, current_flow_id)
-        self.value = self.calc_value(input_values)
-        output_nodes_ids = self._output_nodes_ids if self.is_active() else -1
-        if self.flow_calc_id != current_flow_id:
+    def _process_inputs(self, graph: 'GrowingGraph', current_flow_id: int, node_id_from: int) -> Union[int, List[int], None]:
+        prev_state = self.is_active()
+        prev_value = self.value
+        self.value = self.calc_value(graph.get_node(node_id_from), node_id_from)
+        output_nodes_ids = self._output_nodes_ids if self.is_active() and prev_value != self.value else -1
+        if prev_state != self.is_active():
             if self.is_active():
                 self._process_active_value(graph)
             else:
                 self._process_inactive_value(graph, current_flow_id)
-            self.flow_calc_id = current_flow_id
 
         if self._duplicate_left == 0:
             graph.delete_node(self.id)
             output_nodes_ids = -1
+        self.flow_calc_id = current_flow_id
         return output_nodes_ids
 
-    def forward_flow(self, graph: 'GrowingGraph', current_flow_id: int) -> Optional[List[int]]:
+    def forward_flow(self, graph: 'GrowingGraph', current_flow_id: int, node_id_from: int) -> Optional[List[int]]:
         """Calculates value and returns nodes to be processed next in the flow"""
-        return self._process_inputs(graph, current_flow_id)
+        if self.flow_calc_id != current_flow_id:
+            self.value = 0
+            self._value_sum = 0
+            self._input_nodes_values = defaultdict(int)
+        return self._process_inputs(graph, current_flow_id, node_id_from)
+
+
+class GrowingNodeReceptor(Receptor):
+    def forward_flow(self, graph: 'Graph', current_flow_id: int, prev_node: int) -> Optional[List[int]]:
+        self.flow_calc_id = current_flow_id
+        try:
+            self.value = self.calc_value()
+            return self._output_nodes_ids
+        except StopIteration:
+            logger.info(f"Found stop iterator on receptor with {self.id=}")
+            self.has_stopped = True
+        return []

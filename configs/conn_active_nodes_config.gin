@@ -1,7 +1,10 @@
+include "configs/default.gin"
 import experiments.connecting_activated_nodes
 
 NetStreamProxyGraph.port = 8008
-NetStreamProxyGraph.sleep_time = 0.0005
+NetStreamProxyGraph.sleep_time = 0.001
+
+set_logging_level.logging_level = %INFO
 
 GrowingGraph.draw_graph = True
 GrowingGraph.clear_graph = False
@@ -9,4 +12,4 @@ GrowingGraph.clear_graph = False
 GrowingNode.inactive_count = 30
 GrowingNode.active_count = 1
 GrowingNode.activation_limit = 0.2
-GrowingNode.max_duplicates = 2
+GrowingNode.max_duplicates = 5
