@@ -14,7 +14,6 @@ logger = logging.getLogger()
 class Flow(BaseFlow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._all_leafs = []
 
     def append_to_nodes_deque(self, nodes_ids_pairs: List[Tuple[int, int]]):
         for node_id, node_id_from in nodes_ids_pairs:
@@ -40,25 +39,13 @@ class Flow(BaseFlow):
             else:
                 self.process_leaf(node_id)
 
-    def connect_leafs(self):
-        active_leafs = set()
-        for leaf_id in self._all_leafs:
-            leaf: GrowingNode = self.graph.get_node(leaf_id)
-            if leaf_id in self.graph.input_nodes_ids or leaf.is_active():
-                active_leafs.add(leaf_id)
-
-        if len(active_leafs) > 1:
-            new_node = GrowingNode()
-            self.graph.add_node(new_node)
-            self.graph.add_edges(node_id=new_node.id, nodes_ids=list(active_leafs), as_input=True)
-        self._all_leafs = []
-
     def run_flow(self) -> None:
         while not self.is_flow_completed():
             logger.info(f"Running iteration = {self.current_flow_num}")
+            self.graph.clear_leafs()
             self.run_single_flow()
-            self.connect_leafs()
+            self.graph.connect_leafs()
             self.current_flow_num += 1
 
     def process_leaf(self, node_id: int):
-        self._all_leafs.append(node_id)
+        self.graph.add_leaf(node_id)
