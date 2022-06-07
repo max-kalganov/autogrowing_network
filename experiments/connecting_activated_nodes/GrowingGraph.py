@@ -2,7 +2,7 @@ from typing import List
 
 import gin
 
-from experiments.connecting_activated_nodes import GrowingNode
+from experiments.connecting_activated_nodes.GrowingNode import GrowingNode
 from model_classes import Graph, Node
 
 

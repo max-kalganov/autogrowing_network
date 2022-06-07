@@ -1,7 +1,5 @@
 import random
-from typing import List, Tuple
 
-from experiments.connecting_activated_nodes import GrowingNode
 from experiments.connecting_activated_nodes.Flow import Flow
 from experiments.connecting_activated_nodes.GrowingGraph import GrowingGraph
 from experiments.connecting_activated_nodes.GrowingNode import GrowingNodeReceptor
@@ -27,18 +25,15 @@ def random_generator(number_of_values):
         yield rval
 
 
-def create_receptor_with_node():
-    return GrowingNodeReceptor(random_generator(num_iter)), GrowingNode()
+@gin.configurable()
+def create_receptor(num_iter: int):
+    return GrowingNodeReceptor(random_generator(num_iter))
 
 
-def add_input_to_graph(receptors_with_nodes: List[Tuple[GrowingNodeReceptor, GrowingNode]]) -> GrowingGraph:
-    input_nodes = [rec for rec, node in receptors_with_nodes]
-    graph = GrowingGraph(input_nodes)
-
-    for rec, node in receptors_with_nodes:
-        graph.add_node(node)
-        graph.add_edge(rec.id, node.id)
-    return graph
+@gin.configurable()
+def get_graph_with_input(num_of_receptors: int) -> GrowingGraph:
+    receptors = [create_receptor() for _ in range(num_of_receptors)]
+    return GrowingGraph(receptors)
 
 
 if __name__ == '__main__':
@@ -50,10 +45,6 @@ if __name__ == '__main__':
 
     set_logging_level()
 
-    num_iter = 100
-    num_of_receptors = 20
-    receptors_with_nodes = [create_receptor_with_node() for i in range(num_of_receptors)]
-    graph = add_input_to_graph(receptors_with_nodes)
-
+    graph = get_graph_with_input()
     flow = Flow(graph)
     flow.run_flow()

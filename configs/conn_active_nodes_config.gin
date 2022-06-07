@@ -1,10 +1,13 @@
 include "configs/default.gin"
 import experiments.connecting_activated_nodes
 
-NetStreamProxyGraph.port = 8008
-NetStreamProxyGraph.sleep_time = 0.001
+NetStreamProxyGraph.port = 9010
+NetStreamProxyGraph.sleep_time = 0.01
 
-set_logging_level.logging_level = %INFO
+set_logging_level.logging_level = %DEBUG
+
+get_graph_with_input.num_of_receptors = 10
+create_receptor.num_iter = 20
 
 GrowingGraph.draw_graph = True
 GrowingGraph.clear_graph = False
