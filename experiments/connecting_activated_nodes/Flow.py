@@ -7,6 +7,7 @@ from experiments.connecting_activated_nodes.GrowingNode import GrowingNode
 from model_classes import BaseFlow
 
 import logging
+
 logger = logging.getLogger()
 
 
@@ -23,6 +24,7 @@ class Flow(BaseFlow):
         self.append_to_nodes_deque(list(product(self.graph.input_nodes_ids, [-1])))
 
     def run_single_flow(self):
+        self.graph.clear_leafs()
         self.fill_started_nodes_deque()
         while len(self._nodes_flow_deque) > 0:
             node_id, node_id_from = self._nodes_flow_deque.popleft()
@@ -31,6 +33,10 @@ class Flow(BaseFlow):
 
             node = self.graph.get_node(node_id)
             output_nodes_ids = node.forward_flow(self.graph, self.current_flow_num, node_id_from)
+            if isinstance(output_nodes_ids, list):
+                output_nodes_ids = [node_id for node_id in output_nodes_ids
+                                    if self.graph.get_node(node_id).check_inactive_count(self.graph,
+                                                                                         self.current_flow_num)]
             if output_nodes_ids == -1:
                 continue
             elif len(output_nodes_ids) > 0:
@@ -38,14 +44,13 @@ class Flow(BaseFlow):
                 self.append_to_nodes_deque(output_nodes_ids_pairs)
             else:
                 self.process_leaf(node_id)
+        self.graph.connect_leafs()
+        self.current_flow_num += 1
 
     def run_flow(self) -> None:
         while not self.is_flow_completed():
             logger.info(f"Running iteration = {self.current_flow_num}")
-            self.graph.clear_leafs()
             self.run_single_flow()
-            self.graph.connect_leafs()
-            self.current_flow_num += 1
 
     def process_leaf(self, node_id: int):
         self.graph.add_leaf(node_id)

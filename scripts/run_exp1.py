@@ -1,11 +1,13 @@
 import random
 
-from experiments.connecting_activated_nodes.Flow import Flow
-from experiments.connecting_activated_nodes.GrowingGraph import GrowingGraph
-from experiments.connecting_activated_nodes.GrowingNode import GrowingNodeReceptor
 import gin
 import argparse
 import logging
+
+from utils.data_generators import random_generator
+from experiments.connecting_activated_nodes.Flow import Flow
+from experiments.connecting_activated_nodes.GrowingGraph import GrowingGraph
+from experiments.connecting_activated_nodes.GrowingNode import GrowingNodeReceptor
 
 parser = argparse.ArgumentParser(description='Runs exp1 grow experiment')
 parser.add_argument('--config_path', dest='config_path', action='store',
@@ -14,15 +16,9 @@ logger = logging.getLogger()
 
 
 @gin.configurable()
-def set_logging_level(logging_level = logging.DEBUG):
+def set_logging_level(logging_level=logging.DEBUG):
     logger.info(f"setting logging level - {logging_level}")
     logging.basicConfig(level=logging_level)
-
-
-def random_generator(number_of_values):
-    for i in range(number_of_values):
-        rval = random.random()
-        yield rval
 
 
 @gin.configurable()

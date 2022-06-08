@@ -1,4 +1,5 @@
 import os
+import random
 from dataclasses import dataclass
 import unittest
 
@@ -29,9 +30,10 @@ class SameResultsTest(unittest.TestCase):
 
     @staticmethod
     def _get_node_values_id(graph: Graph):
-        return tuple(graph.get_node(input_node_id).value for input_node_id in graph.input_nodes_ids)
+        return tuple(graph.get_node(input_node_id).value > 0.5 for input_node_id in graph.input_nodes_ids)
 
     def test_same_results(self):
+        random.seed(1)
         self.assertGreater(len(self.test_config.FLOW.graph.input_nodes_ids), 0,
                            f"graph is not filled with input nodes")
 
@@ -43,7 +45,7 @@ class SameResultsTest(unittest.TestCase):
                 self.test_config.FLOW.run_single_flow()
                 node_values_id = self._get_node_values_id(self.test_config.FLOW.graph)
                 output_class = self.test_config.FLOW.graph.get_output_class()
-                print(f"{node_values_id=} -- {output_class=}")
+                print(f"{node_values_id=} -- {output_class=}\n{str(self.test_config.FLOW.graph)}")
                 if node_values_id in input_to_output:
                     self.assertEqual(output_class, input_to_output[node_values_id],
                                      f"different output results for the same input "

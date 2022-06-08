@@ -18,8 +18,10 @@ class GrowingGraph(Graph):
     def clear_leafs(self):
         self._leafs = set()
 
-    def add_leaf_node(self, input_nodes: List[int]) -> int:
+    def add_leaf_node(self, input_nodes: List[int], make_active: bool = False) -> int:
         new_node = GrowingNode()
+        if make_active:
+            new_node.value = new_node._activation_limit
         self.add_node(new_node)
         self.add_edges(node_id=new_node.id, nodes_ids=input_nodes, as_input=True)
         return new_node.id
@@ -41,15 +43,18 @@ class GrowingGraph(Graph):
 
         active_leafs = set(leaf_id for leaf_id in self._leafs if self.get_node(leaf_id).is_active())
         if len(active_leafs) > 1:
-            leaf_node_id = self.add_leaf_node(list(active_leafs))
+            leaf_node_id = self.add_leaf_node(list(active_leafs), make_active=True)
             self._leafs = {leaf_node_id}
 
     def get_output_class(self):
-        output_classes = []
-        for node_id, node in self.all_nodes.items():
-            if node.value > 0:
-                output_classes.append(str(node_id))
-        return '|'.join(output_classes)
+        active_leafs = set(leaf_id for leaf_id in self._leafs if self.get_node(leaf_id).is_active())
+
+        leaf_group_ids = set()
+        for leaf_id in active_leafs:
+            leaf = self.get_node(leaf_id)
+            leaf_group_ids.add(leaf.group_id)
+
+        return str(sorted(leaf_group_ids))
 
     def copy_node(self, node_id: int, NodeClass=Node) -> Node:
         node = self.get_node(node_id)
