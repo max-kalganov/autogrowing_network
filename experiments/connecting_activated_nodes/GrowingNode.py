@@ -109,7 +109,7 @@ class GrowingNode(Node):
 @gin.configurable()
 class GrowingNodeReceptor(Receptor):
     def __init__(self, activation_limit: float, *args, **kwargs):
-        super(GrowingNodeReceptor, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._activation_limit = activation_limit
 
     def is_active(self):

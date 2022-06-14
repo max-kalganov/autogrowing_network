@@ -23,7 +23,7 @@ def set_logging_level(logging_level=logging.DEBUG):
 
 @gin.configurable()
 def create_receptor(num_iter: int):
-    return GrowingNodeReceptor(random_generator(num_iter))
+    return GrowingNodeReceptor(input_iterator=random_generator(num_iter))
 
 
 @gin.configurable()

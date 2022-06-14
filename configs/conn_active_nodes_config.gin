@@ -1,8 +1,8 @@
 include "configs/default.gin"
 import experiments.connecting_activated_nodes
 
-NetStreamProxyGraph.port = 9010
-NetStreamProxyGraph.sleep_time = 0.05
+NetStreamProxyGraph.port = 9009
+NetStreamProxyGraph.sleep_time = 0.0001
 
 set_logging_level.logging_level = %DEBUG
 
