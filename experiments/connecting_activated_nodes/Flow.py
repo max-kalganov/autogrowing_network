@@ -3,7 +3,6 @@ from typing import Tuple, List
 
 import gin
 
-from experiments.connecting_activated_nodes.GrowingNode import GrowingNode
 from model_classes import BaseFlow
 
 import logging
