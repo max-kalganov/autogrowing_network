@@ -36,8 +36,8 @@ class DefaultNetStreamTransport:
         """Connect to remote server if necessary."""
         if self.socket is None:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            logger.info(f"Connecting to remote server - host = {self.host}, port = {self.port}")
             self.socket.connect((self.host, self.port))
-            logger.info(f"Connected to remote server - host = {self.host}, port = {self.port}")
 
     def send(self, data):
         """Send data to remote server."""

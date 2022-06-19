@@ -1,18 +1,23 @@
 """Implementation of Node and Receptor based on Node"""
 import logging
 from typing import List, Optional, Any, Generator
+
+import gin
+
 logger = logging.getLogger()
 
 
+@gin.configurable
 class Node:
     id = 0
 
-    def __init__(self, default_value: Optional[Any] = None):
+    def __init__(self, default_value: Optional[Any] = None, default_flow_id: int = -1):
         self.id = Node.update_id()
         self._input_nodes_ids = []
         self._output_nodes_ids = []
         self.value = default_value
-        self.flow_calc_id = -1
+        self._default_value = default_value
+        self.flow_calc_id = default_flow_id
 
     @classmethod
     def update_id(cls):
@@ -46,6 +51,7 @@ class Node:
         return f"input: {self._input_nodes_ids}; id: {self.id}; output: {self._output_nodes_ids}"
 
 
+@gin.configurable
 class Receptor(Node):
 
     def __init__(self, input_iterator: Generator[None, Any, None]):
