@@ -6,3 +6,4 @@ For now, the task is to find a set of rules, which could lead to any stable grap
 
 ![One of the experiments](data/net_grow_ex.mov)
 
+Input: streamed data into receptors
